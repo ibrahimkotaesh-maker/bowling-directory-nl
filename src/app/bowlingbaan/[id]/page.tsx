@@ -3,16 +3,22 @@ import { MapPin, Star, Phone, Globe, Clock, Navigation } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
 
 export const revalidate = 86400; // 24 hours
 
 export async function generateStaticParams() {
-    const { data: centers } = await supabase.from("bowling_centers").select("place_id");
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) return [];
+    const client = createClient(url, key);
+    const { data: centers } = await client.from("bowling_centers").select("place_id");
     if (!centers) return [];
     return centers.map((center) => ({
         id: center.place_id,
     }));
 }
+
 
 export default async function BowlingCenterPage({ params }: { params: { id: string } }) {
     const { id } = await params;
