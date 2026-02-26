@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next';
+// Dynamic sitemap — generates all routes for Google Search Console indexing
 import { supabase } from "@/lib/supabaseClient";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
