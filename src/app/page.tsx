@@ -3,7 +3,8 @@ import { Search, MapPin, Star, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-export const revalidate = 3600; // Refetch every hour
+export const dynamic = 'force-dynamic';
+
 
 export default async function Home() {
   const { data: bowlingCenters } = await supabase

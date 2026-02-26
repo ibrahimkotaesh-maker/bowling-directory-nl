@@ -2,7 +2,8 @@ import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 import { MapPin, Star } from "lucide-react";
 
-export const revalidate = 86400; // Refetch daily
+export const dynamic = 'force-dynamic';
+
 
 const POPULAR_CITIES = [
     "Amsterdam", "Rotterdam", "Den Haag", "Utrecht", "Eindhoven",
