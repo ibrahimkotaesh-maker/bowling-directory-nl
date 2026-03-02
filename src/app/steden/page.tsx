@@ -11,6 +11,28 @@ const POPULAR_CITIES = [
     "Apeldoorn", "Haarlem", "Arnhem", "Enschede", "Amersfoort"
 ];
 
+// Major city → nearby suburbs for accurate counting
+const AREA_MAPPING: Record<string, string[]> = {
+    'amsterdam': ['amsterdam', 'amstelveen', 'zaandam', 'zwanenburg', 'diemen', 'hoofddorp', 'weesp', 'ouderkerk'],
+    'rotterdam': ['rotterdam', 'schiedam', 'vlaardingen', 'capelle', 'spijkenisse', 'ridderkerk', 'barendrecht'],
+    'den haag': ['den haag', 'the hague', 'rijswijk', 'leidschendam', 'voorburg', 'zoetermeer', 'delft', 'westland'],
+    'utrecht': ['utrecht', 'nieuwegein', 'maarssen', 'zeist', 'houten', 'woerden', 'de bilt'],
+    'eindhoven': ['eindhoven', 'veldhoven', 'helmond', 'best', 'geldrop'],
+    'groningen': ['groningen', 'haren', 'hoogezand', 'eelde'],
+    'tilburg': ['tilburg', 'breda', 'dongen', 'waalwijk'],
+    'arnhem': ['arnhem', 'nijmegen', 'zevenaar', 'doesburg'],
+    'haarlem': ['haarlem', 'haarlemmermeer', 'beverwijk', 'ijmuiden'],
+};
+
+function getMetroCount(city: string, addresses: string[]): number {
+    const key = city.toLowerCase();
+    const terms = AREA_MAPPING[key] || [key];
+    return addresses.filter(addr => {
+        const addrLower = addr.toLowerCase();
+        return terms.some(t => addrLower.includes(t));
+    }).length;
+}
+
 export const metadata = {
     title: "Bowlingbanen per Stad in Nederland",
     description: "Vind de leukste en beste bowlingbanen in jouw stad. Selecteer een stad uit het overzicht en reserveer direct!",
@@ -19,7 +41,9 @@ export const metadata = {
 export default async function CitiesIndexPage() {
     const { data: centers } = await supabase.from("bowling_centers").select("formatted_address");
 
-    // Count centers per city roughly
+    const allAddresses = centers?.map(c => c.formatted_address) || [];
+
+    // Count centers per city for the "all cities" section
     const cityCounts: Record<string, number> = {};
     const allCities = new Set<string>();
 
@@ -73,9 +97,8 @@ export default async function CitiesIndexPage() {
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                         {availablePopularCities.map((city) => {
                             const slug = city.toLowerCase().replace(/\s+/g, '-');
-                            // Find proper casing from the actual data
-                            const actualDataCity = Array.from(allCities).find(c => c.toLowerCase() === city.toLowerCase()) || city;
-                            const count = cityCounts[actualDataCity] || 0;
+                            // Use metro area count for popular cities
+                            const count = getMetroCount(city, allAddresses);
 
                             return (
                                 <Link
