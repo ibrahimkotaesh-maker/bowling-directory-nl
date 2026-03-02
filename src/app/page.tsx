@@ -109,14 +109,34 @@ export default async function Home() {
                 {/* Content Area */}
                 <div className="p-6 flex flex-col flex-1 relative">
                   <h3 className="font-extrabold text-xl mb-2 line-clamp-1 group-hover:text-color-brand-neon transition-colors text-white">{center.name}</h3>
-                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-6">
-                    <MapPin size={16} className="text-gray-500" />
+                  <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">
+                    <MapPin size={16} className="text-gray-500 shrink-0" />
                     <span className="line-clamp-1">{center.formatted_address}</span>
                   </div>
 
+                  {/* Activities Tags */}
+                  {center.activities && (
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {center.activities.split(', ').slice(0, 3).map((act: string, idx: number) => (
+                        <span key={idx} className="text-xs px-2 py-1 rounded-md bg-white/5 border border-white/10 text-gray-300 font-medium">
+                          {act}
+                        </span>
+                      ))}
+                      {center.activities.split(', ').length > 3 && (
+                        <span className="text-xs px-2 py-1 rounded-md bg-color-brand-neon/10 border border-color-brand-neon/20 text-color-brand-neon font-medium">
+                          +{center.activities.split(', ').length - 3}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   <div className="mt-auto pt-5 border-t border-white/5 flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-500 flex items-center gap-1.5">
-                      <span className="bg-gray-800 text-gray-300 px-2 py-0.5 rounded-md">{center.total_reviews}</span> beoordelingen
+                      {center.num_lanes ? (
+                        <><span className="bg-color-brand-purple/15 text-color-brand-purple px-2 py-0.5 rounded-md font-bold">{center.num_lanes}</span> banen</>
+                      ) : (
+                        <><span className="bg-gray-800 text-gray-300 px-2 py-0.5 rounded-md">{center.total_reviews}</span> reviews</>
+                      )}
                     </span>
                     <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-color-brand-neon group-hover:text-black transition-colors">
                       <ChevronRight size={16} />

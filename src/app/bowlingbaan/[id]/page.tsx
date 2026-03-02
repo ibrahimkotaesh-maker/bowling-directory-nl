@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabaseClient";
-import { MapPin, Star, Phone, Globe, Clock, Navigation } from "lucide-react";
+import { MapPin, Star, Phone, Globe, Clock, Navigation, Tag, Ticket, ParkingCircle, Wifi, Heart, ExternalLink, Euro, Layers } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -103,9 +103,15 @@ export default async function BowlingCenterPage({ params }: { params: { id: stri
                         </div>
                     </div>
 
-                    <div className="z-10 flex gap-4">
+                    <div className="z-10 flex gap-3 flex-wrap">
+                        {center.reservation_url && (
+                            <a href={center.reservation_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-color-brand-neon text-black px-6 py-3 rounded-xl font-bold hover:bg-white transition-colors shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+                                <Ticket size={20} />
+                                Reserveer Nu
+                            </a>
+                        )}
                         {center.google_maps_url && (
-                            <a href={center.google_maps_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-color-brand-neon text-black px-6 py-3 rounded-xl font-bold hover:bg-white transition-colors shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+                            <a href={center.google_maps_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-6 py-3 rounded-xl font-bold hover:bg-white/20 transition-colors border border-white/20">
                                 <Navigation size={20} />
                                 Route
                             </a>
@@ -118,6 +124,37 @@ export default async function BowlingCenterPage({ params }: { params: { id: stri
 
                 {/* Left Column: Details & Photos */}
                 <div className="lg:col-span-2 space-y-12">
+
+                    {/* Description */}
+                    {center.scraped_description && (
+                        <section className="bg-color-panel p-8 rounded-3xl border border-white/5 space-y-4">
+                            <h2 className="text-2xl font-bold text-white">Over {center.name.split('|')[0].trim()}</h2>
+                            <p className="text-gray-300 leading-relaxed text-lg">{center.scraped_description}</p>
+                        </section>
+                    )}
+
+                    {/* Activities */}
+                    {center.activities && (
+                        <section className="bg-color-panel p-8 rounded-3xl border border-white/5 space-y-6">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-2xl font-bold text-white">Activiteiten</h2>
+                                {center.num_lanes && (
+                                    <div className="flex items-center gap-2 bg-color-brand-purple/15 text-color-brand-purple px-4 py-2 rounded-full border border-color-brand-purple/20 font-bold text-sm">
+                                        <Layers size={16} />
+                                        {center.num_lanes} Bowlingbanen
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex flex-wrap gap-3">
+                                {center.activities.split(', ').map((activity: string, idx: number) => (
+                                    <span key={idx} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-gray-200 font-medium hover:border-color-brand-neon/40 hover:bg-color-brand-neon/5 transition-colors text-sm">
+                                        <Tag size={14} className="text-color-brand-neon" />
+                                        {activity}
+                                    </span>
+                                ))}
+                            </div>
+                        </section>
+                    )}
 
                     {/* Quick Info */}
                     <section className="bg-color-panel p-8 rounded-3xl border border-white/5 space-y-6">
@@ -149,8 +186,47 @@ export default async function BowlingCenterPage({ params }: { params: { id: stri
                                     </div>
                                 </div>
                             )}
+                            {center.pricing && (
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-green-500/20 text-green-400 flex items-center justify-center">
+                                        <Euro size={24} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500 font-medium mb-1">Prijsindicatie</p>
+                                        <span className="text-lg text-white font-medium">{center.pricing}</span>
+                                    </div>
+                                </div>
+                            )}
+                            {center.reservation_url && (
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-color-brand-neon/20 text-color-brand-neon flex items-center justify-center">
+                                        <Ticket size={24} />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-gray-500 font-medium mb-1">Online Reserveren</p>
+                                        <a href={center.reservation_url} target="_blank" rel="noopener noreferrer" className="text-lg text-color-brand-neon hover:text-white transition-colors font-medium flex items-center gap-1">
+                                            Reserveer direct <ExternalLink size={14} />
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </section>
+
+                    {/* Amenities */}
+                    {center.amenities && (
+                        <section className="bg-color-panel p-8 rounded-3xl border border-white/5 space-y-6">
+                            <h2 className="text-2xl font-bold text-white">Faciliteiten</h2>
+                            <div className="flex flex-wrap gap-3">
+                                {center.amenities.split(', ').map((amenity: string, idx: number) => (
+                                    <span key={idx} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-500/5 border border-green-500/15 text-green-300 font-medium text-sm">
+                                        <Heart size={14} className="text-green-400" />
+                                        {amenity}
+                                    </span>
+                                ))}
+                            </div>
+                        </section>
+                    )}
 
                     {/* Photos Gallery */}
                     {photos.length > 1 && (
