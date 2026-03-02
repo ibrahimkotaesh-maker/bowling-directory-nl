@@ -53,7 +53,7 @@ export default async function CityPage({ params }: { params: { city: string } })
             item: {
                 '@type': 'BowlingAlley',
                 name: center?.name || 'Onbekende bowlingbaan',
-                url: `https://bowlonl.nl/bowlingbaan/${center?.place_id || ''}`
+                url: `https://bowlingplekken.nl/bowlingbaan/${center?.place_id || ''}`
             }
         }))
     };

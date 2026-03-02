@@ -38,8 +38,8 @@ export default async function BowlingCenterPage({ params }: { params: { id: stri
         '@context': 'https://schema.org',
         '@type': 'BowlingAlley',
         name: center.name,
-        image: photos.length > 0 ? `https://bowlonl.nl/${photos[0]}` : undefined,
-        url: center.website || `https://bowlonl.nl/bowlingbaan/${center.place_id}`,
+        image: photos.length > 0 ? `https://bowlingplekken.nl/${photos[0]}` : undefined,
+        url: center.website || `https://bowlingplekken.nl/bowlingbaan/${center.place_id}`,
         telephone: center.phone,
         address: {
             '@type': 'PostalAddress',
