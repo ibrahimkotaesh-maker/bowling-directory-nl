@@ -1,69 +1,56 @@
-// Dynamic sitemap — generates all routes for Google Search Console indexing
-import { MetadataRoute } from 'next';
 import { createClient } from '@supabase/supabase-js';
+import type { MetadataRoute } from 'next';
+
+export const revalidate = 86400; // Regenerate every 24 hours
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-    const baseUrl = 'https://bowlingplekken.nl';
-    const lastModified = new Date();
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !key) return [];
 
-    // Static routes
-    const staticRoutes = [
-        '',
-        '/zoeken',
-        '/steden',
-        '/tarieven',
-        '/tips',
-    ].map((route) => ({
-        url: `${baseUrl}${route}`,
-        lastModified,
-        changeFrequency: 'weekly' as const,
-        priority: route === '' ? 1.0 : 0.8,
-    }));
+    const supabase = createClient(url, key);
 
-    // Guard: if env vars are missing, return only static routes
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-    if (!supabaseUrl || !supabaseKey) {
-        return staticRoutes;
-    }
-
-    // Create supabase client inline (avoids module-level instantiation crash)
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Fetch all bowling centers for dynamic routes
+    // Get all bowling centers
     const { data: centers } = await supabase
-        .from("bowling_centers")
-        .select("place_id, formatted_address");
+        .from('bowling_centers')
+        .select('place_id, formatted_address');
 
-    // Centers routes
-    const centerRoutes = (centers || []).map((center: { place_id: string }) => ({
+    // Get unique cities
+    const cities = new Set<string>();
+    centers?.forEach((c) => {
+        const parts = c.formatted_address.split(',');
+        if (parts.length > 1) {
+            const city = parts[parts.length - 2].trim().replace(/\d{4}\s*[A-Z]{2}\s*/g, '').trim();
+            if (city) cities.add(city.toLowerCase().replace(/\s+/g, '-'));
+        }
+    });
+
+    const baseUrl = 'https://bowlingplekken.nl';
+
+    // Static pages
+    const staticPages: MetadataRoute.Sitemap = [
+        { url: baseUrl, lastModified: new Date(), changeFrequency: 'weekly', priority: 1.0 },
+        { url: `${baseUrl}/zoeken`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.9 },
+        { url: `${baseUrl}/steden`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+        { url: `${baseUrl}/tips`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+        { url: `${baseUrl}/tarieven`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    ];
+
+    // Dynamic bowling center pages
+    const centerPages: MetadataRoute.Sitemap = (centers || []).map((center) => ({
         url: `${baseUrl}/bowlingbaan/${center.place_id}`,
-        lastModified,
-        changeFrequency: 'monthly' as const,
+        lastModified: new Date(),
+        changeFrequency: 'weekly' as const,
         priority: 0.7,
     }));
 
-    // City routes
-    const allCities = new Set<string>();
-    if (centers) {
-        centers.forEach((center: { formatted_address: string }) => {
-            if (!center.formatted_address) return;
-            const addressParts = center.formatted_address.split(',');
-            if (addressParts.length > 1) {
-                const possibleCityPart = addressParts[addressParts.length - 2].trim();
-                const cityMatch = possibleCityPart.match(/\d{4}\s*[A-Z]{2}\s+(.*)/i);
-                const city = cityMatch ? cityMatch[1] : possibleCityPart;
-                allCities.add(city.toLowerCase().replace(/\s+/g, '-'));
-            }
-        });
-    }
-
-    const cityRoutes = Array.from(allCities).map((citySlug) => ({
-        url: `${baseUrl}/bowlen-in/${citySlug}`,
-        lastModified,
+    // City pages
+    const cityPages: MetadataRoute.Sitemap = Array.from(cities).map((city) => ({
+        url: `${baseUrl}/bowlen-in/${city}`,
+        lastModified: new Date(),
         changeFrequency: 'weekly' as const,
-        priority: 0.9,
+        priority: 0.8,
     }));
 
-    return [...staticRoutes, ...cityRoutes, ...centerRoutes];
+    return [...staticPages, ...centerPages, ...cityPages];
 }

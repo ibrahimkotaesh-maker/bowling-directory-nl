@@ -2,19 +2,35 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { Search, MapPin, Star, Filter, Loader2 } from "lucide-react";
+import { Search, MapPin, Star, Filter, Loader2, Tag, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+
+const ACTIVITY_OPTIONS = [
+    "Bowling", "Lasergame", "Pool/Biljart", "Karaoke", "Karten",
+    "Escape Room", "Kinderfeestjes", "Darts", "Minigolf", "Arcades",
+    "Shuffleboard", "Squash", "Paintball", "Restaurant"
+];
 
 export default function SearchPage() {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [minRating, setMinRating] = useState<number>(0);
+    const [selectedActivities, setSelectedActivities] = useState<string[]>([]);
+    const [showFilters, setShowFilters] = useState(false);
 
     useEffect(() => {
         fetchResults();
-    }, [query, minRating]);
+    }, [query, minRating, selectedActivities]);
+
+    function toggleActivity(activity: string) {
+        setSelectedActivities(prev =>
+            prev.includes(activity)
+                ? prev.filter(a => a !== activity)
+                : [...prev, activity]
+        );
+    }
 
     async function fetchResults() {
         setLoading(true);
@@ -29,9 +45,21 @@ export default function SearchPage() {
                 supabaseQuery = supabaseQuery.or(`name.ilike.%${query}%,formatted_address.ilike.%${query}%`);
             }
 
+            // Activity filter — filter client-side for multiple selections
             const { data, error } = await supabaseQuery;
             if (error) throw error;
-            setResults(data || []);
+
+            let filtered = data || [];
+            if (selectedActivities.length > 0) {
+                filtered = filtered.filter(center => {
+                    if (!center.activities) return false;
+                    return selectedActivities.every(act =>
+                        center.activities.toLowerCase().includes(act.toLowerCase())
+                    );
+                });
+            }
+
+            setResults(filtered);
         } catch (error) {
             console.error("Error fetching search results:", error);
         } finally {
@@ -74,7 +102,57 @@ export default function SearchPage() {
                                 <option value={3.5} className="bg-[#111]">3.5+ Sterren</option>
                             </select>
                         </div>
+
+                        <button
+                            onClick={() => setShowFilters(!showFilters)}
+                            className={`flex items-center gap-2 px-6 py-4 rounded-2xl border font-bold transition-all ${showFilters
+                                ? 'bg-color-brand-neon/10 border-color-brand-neon/50 text-color-brand-neon'
+                                : 'bg-color-panel border-white/10 text-gray-300 hover:border-white/30'
+                                }`}
+                        >
+                            <Tag size={20} />
+                            Activiteiten
+                            {selectedActivities.length > 0 && (
+                                <span className="bg-color-brand-neon text-black text-xs font-black px-2 py-0.5 rounded-full">
+                                    {selectedActivities.length}
+                                </span>
+                            )}
+                        </button>
                     </div>
+
+                    {/* Activity Filters */}
+                    {showFilters && (
+                        <div className="bg-color-panel p-6 rounded-2xl border border-white/10 space-y-4 animate-in fade-in slide-in-from-top-2">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-lg font-bold text-white">Filter op activiteiten</h3>
+                                {selectedActivities.length > 0 && (
+                                    <button
+                                        onClick={() => setSelectedActivities([])}
+                                        className="text-sm text-gray-400 hover:text-white flex items-center gap-1 transition-colors"
+                                    >
+                                        <X size={14} /> Wis filters
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {ACTIVITY_OPTIONS.map((activity) => {
+                                    const isActive = selectedActivities.includes(activity);
+                                    return (
+                                        <button
+                                            key={activity}
+                                            onClick={() => toggleActivity(activity)}
+                                            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive
+                                                ? 'bg-color-brand-neon text-black shadow-[0_0_12px_rgba(0,240,255,0.3)]'
+                                                : 'bg-white/5 border border-white/10 text-gray-300 hover:border-color-brand-neon/40 hover:text-white'
+                                                }`}
+                                        >
+                                            {activity}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {/* Results Info */}
@@ -82,7 +160,7 @@ export default function SearchPage() {
                     {loading ? (
                         <span className="flex items-center gap-2"><Loader2 className="animate-spin" size={18} /> Zoeken...</span>
                     ) : (
-                        <span>{results.length} resultaten gevonden {query && `voor "${query}"`}</span>
+                        <span>{results.length} resultaten gevonden {query && `voor "${query}"`} {selectedActivities.length > 0 && `met ${selectedActivities.join(', ')}`}</span>
                     )}
                 </div>
 
@@ -114,23 +192,41 @@ export default function SearchPage() {
                                                 Nu Open
                                             </div>
                                         )}
+                                        {center.rating && (
+                                            <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full flex items-center gap-1 text-sm font-bold border border-white/10">
+                                                <Star size={14} className="text-yellow-400 fill-yellow-400" />
+                                                <span className="text-white">{center.rating.toFixed(1)}</span>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
+                                    <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
                                         <div className="space-y-2">
-                                            <h3 className="text-xl font-bold text-white group-hover:text-color-brand-neon transition-colors line-clamp-1">{center.name}</h3>
+                                            <h3 className="text-lg font-bold text-white group-hover:text-color-brand-neon transition-colors line-clamp-1">{center.name}</h3>
                                             <div className="flex items-start gap-2 text-gray-400">
-                                                <MapPin size={16} className="shrink-0 mt-0.5" />
-                                                <p className="text-sm line-clamp-2">{center.formatted_address}</p>
+                                                <MapPin size={14} className="shrink-0 mt-0.5" />
+                                                <p className="text-sm line-clamp-1">{center.formatted_address}</p>
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                                            <div className="flex items-center gap-1.5">
-                                                <Star size={18} className="text-yellow-400 fill-yellow-400" />
-                                                <span className="text-white font-bold">{center.rating || "N/A"}</span>
-                                                <span className="text-gray-500 text-xs">({center.total_reviews})</span>
+                                        {/* Activity Tags */}
+                                        {center.activities && (
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {center.activities.split(', ').slice(0, 3).map((act: string, idx: number) => (
+                                                    <span key={idx} className="text-xs px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-gray-400">
+                                                        {act}
+                                                    </span>
+                                                ))}
+                                                {center.activities.split(', ').length > 3 && (
+                                                    <span className="text-xs px-2 py-0.5 rounded-md bg-color-brand-neon/10 border border-color-brand-neon/20 text-color-brand-neon">
+                                                        +{center.activities.split(', ').length - 3}
+                                                    </span>
+                                                )}
                                             </div>
+                                        )}
+
+                                        <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                                            <span className="text-gray-500 text-xs">{center.total_reviews} reviews</span>
                                             <span className="text-color-brand-neon text-sm font-bold group-hover:underline">Bekijk ›</span>
                                         </div>
                                     </div>
