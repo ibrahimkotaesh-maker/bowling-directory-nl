@@ -12,7 +12,7 @@ const POPULAR_CITIES = [
 ];
 
 export const metadata = {
-    title: "Bowlingbanen per Stad in Nederland | BowloNL",
+    title: "Bowlingbanen per Stad in Nederland",
     description: "Vind de leukste en beste bowlingbanen in jouw stad. Selecteer een stad uit het overzicht en reserveer direct!",
 };
 

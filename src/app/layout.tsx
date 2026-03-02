@@ -6,8 +6,32 @@ import Link from "next/link";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "BowlingBanen Nederland | Vind de beste bowlingbaan",
-  description: "Vind 250+ bowlingbanen in Nederland. Bekijk foto's, prijzen, openingstijden en reserveer vandaag nog jouw baan!",
+  title: {
+    default: "BowlingPlekken.nl | Vind de beste bowlingbaan in Nederland",
+    template: "%s | BowlingPlekken.nl",
+  },
+  description: "Ontdek 250+ bowlingbanen in heel Nederland. Vergelijk beoordelingen, bekijk foto's, openingstijden en vind de perfecte bowlingbaan bij jou in de buurt.",
+  metadataBase: new URL('https://bowlingplekken.nl'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: "BowlingPlekken.nl | Vind de beste bowlingbaan in Nederland",
+    description: "Ontdek 250+ bowlingbanen in heel Nederland. Vergelijk beoordelingen, bekijk foto's en vind de perfecte bowlingbaan.",
+    url: 'https://bowlingplekken.nl',
+    siteName: 'BowlingPlekken.nl',
+    locale: 'nl_NL',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "BowlingPlekken.nl | Vind de beste bowlingbaan",
+    description: "Ontdek 250+ bowlingbanen in heel Nederland.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -23,7 +47,7 @@ export default function RootLayout({
           <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2">
               <span className="text-2xl drop-shadow-[0_0_8px_rgba(0,240,255,0.8)]">🎳</span>
-              <span className="font-extrabold text-xl tracking-tight text-white">Bowlo<span className="text-color-brand-neon">NL</span></span>
+              <span className="font-extrabold text-xl tracking-tight text-white">Bowling<span className="text-color-brand-neon">Plekken</span></span>
             </Link>
             <div className="hidden md:flex items-center gap-8 font-medium">
               <Link href="/zoeken" className="text-white hover:text-color-brand-neon transition-colors">Zoeken & Filteren</Link>
@@ -38,7 +62,7 @@ export default function RootLayout({
 
         {/* Footer */}
         <footer className="w-full border-t border-color-border mt-auto bg-[#0a0a0a] text-center p-8">
-          <p className="text-gray-500 text-sm">© {new Date().getFullYear()} BowloNL. Alle rechten voorbehouden.</p>
+          <p className="text-gray-500 text-sm">© {new Date().getFullYear()} BowlingPlekken.nl — Alle rechten voorbehouden.</p>
         </footer>
       </body>
     </html>

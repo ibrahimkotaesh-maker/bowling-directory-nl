@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CheckCircle2, Info } from "lucide-react";
 
 export const metadata = {
-    title: "Wat kost bowlen? | Tarieven & Prijzen 2026 | BowloNL",
+    title: "Wat kost bowlen? | Tarieven & Prijzen 2026",
     description: "Ontdek de gemiddelde kosten voor een uurtje bowlen in Nederland. Bekijk tarieven voor daluren, weekenden, discobowlen en kinderfeestjes.",
 };
 

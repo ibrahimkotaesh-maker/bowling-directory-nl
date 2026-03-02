@@ -1,0 +1,6 @@
+# BowlingPlekken.nl - Robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://bowlingplekken.nl/sitemap.xml

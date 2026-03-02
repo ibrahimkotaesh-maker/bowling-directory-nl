@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Info, HelpCircle } from "lucide-react";
 
 export const metadata = {
-    title: "Bowling Tips & Spelregels | Verbeter je score | BowloNL",
+    title: "Bowling Tips & Spelregels | Verbeter je Score",
     description: "Lees de belangrijkste bowling spelregels, leer hoe de puntentelling werkt (strikes en spares) en ontdek handige tips om meer te gooien.",
 };
 
